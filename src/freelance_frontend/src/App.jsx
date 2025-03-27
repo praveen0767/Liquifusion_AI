@@ -1,31 +1,43 @@
-import { useState } from 'react';
-import { freelance_backend } from 'declarations/freelance_backend';
+import React, { useState, useEffect } from "react";
+import { initAuth, login, logout } from "./auth";
+import ClientDashboard from "./components/ClientDashboard";
+import FreelancerDashboard from "./components/FreelancerDashboard";
 
-function App() {
-  const [greeting, setGreeting] = useState('');
+const App = () => {
+  const [user, setUser] = useState(null);
+  const [role, setRole] = useState("client");
 
-  function handleSubmit(event) {
-    event.preventDefault();
-    const name = event.target.elements.name.value;
-    freelance_backend.greet(name).then((greeting) => {
-      setGreeting(greeting);
-    });
-    return false;
-  }
+  useEffect(() => {
+    initAuth();
+  }, []);
 
   return (
-    <main>
-      <img src="/logo2.svg" alt="DFINITY logo" />
-      <br />
-      <br />
-      <form action="#" onSubmit={handleSubmit}>
-        <label htmlFor="name">Enter your name: &nbsp;</label>
-        <input id="name" alt="Name" type="text" />
-        <button type="submit">Click Me!</button>
-      </form>
-      <section id="greeting">{greeting}</section>
-    </main>
+    <div>
+      <div className="header">
+        <button
+          onClick={() => setRole(role === "client" ? "freelancer" : "client")}
+        >
+          Switch to {role === "client" ? "Freelancer" : "Client"}
+        </button>
+        <button onClick={() => (user ? logout(setUser) : login(setUser))}>
+          {user ? "Logout" : "Login with ICP"}
+        </button>
+      </div>
+
+      <div className="main">
+        <h1>Decentralized Freelance Platform</h1>
+        {user ? (
+          role === "client" ? (
+            <ClientDashboard user={user} />
+          ) : (
+            <FreelancerDashboard user={user} />
+          )
+        ) : (
+          <p>Please log in to continue.</p>
+        )}
+      </div>
+    </div>
   );
-}
+};
 
 export default App;

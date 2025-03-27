@@ -1,3 +1,8 @@
 service : {
-    "greet": (text) -> (text) query;
+  "post_job": (text, text, nat64, text, text) -> (nat64);
+  "get_jobs": () -> (vec record { id: nat64; title: text; description: text; budget: nat64; deadline: text; client: text; freelancer: opt text; proposals: vec record { freelancer: text; cover_letter: text; expected_budget: nat64; }; });
+  "submit_proposal": (nat64, text, text, nat64) -> (bool);
+  "accept_proposal": (nat64, text) -> (bool);
+  "send_message": (nat64, text, text, nat64) -> (bool);
+  "get_chat": (nat64) -> (vec record { sender: text; content: text; timestamp: nat64; });
 }

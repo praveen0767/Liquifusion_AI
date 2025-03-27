@@ -3,12 +3,31 @@ name = "freelance_backend"
 version = "0.1.0"
 edition = "2021"
 
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
-
 [lib]
 crate-type = ["cdylib"]
 
 [dependencies]
-candid = "0.10"
-ic-cdk = "0.17"
-ic-cdk-timers = "0.11" # Feel free to remove this dependency if you don't need timers
+candid = "0.10.6"
+serde = { version = "1.0.160", features = ["derive"] }
+ic-cdk-timers = "0.7" # Feel free to remove this dependency if you don't need timers
+candid-extractor = "0.1.2"
+serde_bytes = "0.11.14"
+ic-stable-structures = "0.6.2"
+ciborium = { git = "https://github.com/enarx/ciborium", rev = "e719537c99b564c3674a56defe53713c702c6f46" }
+getrandom = { version = "0.2", features = ["js"] }
+sha2 = "0.9.8"
+ic-cdk = "0.13.2"
+ic-cdk-macros = "0.13.2"
+icrc-ledger-types = "0.1.5"
+
+[profile.release]
+opt-level = "z"  # Optimize for size
+lto = true       # Link-time optimization
+codegen-units = 1
+panic = "abort"
+
+# ICP-specific configuration to ensure WebAssembly compatibility
+#[target.wasm32-unknown-unknown.dependencies]
+# Additional dependencies specific to WASM target can be added here
+
+
