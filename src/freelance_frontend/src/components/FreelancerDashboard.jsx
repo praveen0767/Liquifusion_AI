@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import "./FreelanceDashboard.css"; // Import the CSS file
 import { freelance_backend } from "../../../declarations/freelance_backend";
 
 const FreelancerDashboard = ({ user }) => {
@@ -44,7 +45,7 @@ const FreelancerDashboard = ({ user }) => {
   };
 
   return (
-    <div>
+    <div className="freelancer-dashboard">
       <h2>Freelancer Dashboard</h2>
 
       <h3>Available Jobs</h3>

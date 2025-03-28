@@ -1,0 +1,112 @@
+/* src/components/FreelancerDashboard.css */
+
+/* Freelancer Dashboard Container */
+.freelancer-dashboard {
+  background-color: #ffffff;
+  padding: 2rem;
+  border-radius: 12px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  margin: 2rem auto;
+  max-width: 1000px;
+  width: 100%;
+  box-sizing: border-box;
+  animation: fadeIn 1s ease-in-out;
+}
+
+.freelancer-dashboard h2 {
+  font-size: 2.25rem;
+  font-weight: 700;
+  color: #1f2937;
+  margin-bottom: 1.5rem;
+  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.freelancer-dashboard h2 svg {
+  color: #4f46e5;
+}
+
+.freelancer-dashboard h3 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #1f2937;
+  margin-bottom: 1rem;
+  text-align: center;
+}
+
+.freelancer-dashboard ul {
+  list-style-type: none;
+  padding: 0;
+}
+
+.freelancer-dashboard li {
+  background-color: #f8fafc;
+  padding: 1rem;
+  border-radius: 8px;
+  margin-bottom: 1rem;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+  animation: slideIn 0.5s ease-in-out;
+  transition: transform 0.3s ease;
+}
+
+.freelancer-dashboard li:hover {
+  transform: translateY(-3px);
+}
+
+.freelancer-dashboard li strong {
+  font-size: 1.125rem;
+  color: #1f2937;
+}
+
+.freelancer-dashboard li textarea {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 1rem;
+  color: #1f2937;
+  margin: 0.5rem 0;
+  min-height: 80px;
+  resize: vertical;
+  transition: border-color 0.3s ease;
+}
+
+.freelancer-dashboard li textarea:focus {
+  outline: none;
+  border-color: #4f46e5;
+  box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+}
+
+.freelancer-dashboard li button {
+  padding: 0.5rem 1rem;
+  background: linear-gradient(to right, #10b981, #22d3ee);
+  color: white;
+  font-weight: 600;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.freelancer-dashboard li button:hover {
+  background: linear-gradient(to right, #059669, #0ea5e9);
+  transform: scale(1.05);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .freelancer-dashboard {
+    padding: 1rem;
+  }
+
+  .freelancer-dashboard h2,
+  .freelancer-dashboard h3 {
+    font-size: 1.25rem;
+  }
+}

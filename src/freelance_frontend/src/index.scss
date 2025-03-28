@@ -1,55 +1,73 @@
-.client-dashboard {
-  background-color: #f8f9fa;
-  padding: 20px;
-  border-radius: 10px;
+// src/index.scss
+
+// Global Styles
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
 }
 
-.freelancer-dashboard {
-  background-color: #e3f2fd;
-  padding: 20px;
-  border-radius: 10px;
+body {
+  font-family: "Inter", sans-serif;
+  background: linear-gradient(135deg, #e0e7ff, #f3f4f6);
+  overflow-x: hidden;
 }
 
+// Animation Keyframes
+@keyframes fadeIn {
+  0% {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideIn {
+  0% {
+    opacity: 0;
+    transform: translateX(-20px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+// Apply animations globally
+.fade-in {
+  animation: fadeIn 1s ease-in-out;
+}
+
+.slide-in {
+  animation: slideIn 0.5s ease-in-out;
+}
+
+// Button hover effects
 button {
-  margin: 10px;
   padding: 10px 20px;
   border: none;
   border-radius: 5px;
   cursor: pointer;
+  transition: all 0.3s ease;
 }
 
 button:hover {
-  opacity: 0.8;
-}
-.header {
-  display: flex;
-  justify-content: space-between;
-  padding: 10px;
-  background: #282c34;
-  color: white;
+  transform: scale(1.05);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
 }
 
-.job-form {
-  display: flex;
-  flex-direction: column;
-  max-width: 400px;
-}
-
-.job-form input,
-.job-form textarea {
-  margin-bottom: 10px;
-  padding: 5px;
-}
-
-button {
-  padding: 10px;
-  background: #007bff;
-  color: white;
-  border: none;
-  cursor: pointer;
-}
-
-.job-list ul {
-  list-style-type: none;
-  padding: 0;
+// ClientDashboard and FreelancerDashboard base styles
+.client-dashboard,
+.freelancer-dashboard {
+  background-color: #ffffff;
+  padding: 20px;
+  border-radius: 12px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+  margin: 20px auto;
+  max-width: 100%;
+  width: 100%;
+  box-sizing: border-box;
 }

@@ -10,6 +10,7 @@ enum JobStatus {
     InProgress,
     Completed,
     Cancelled,
+    Disputed,
 }
 
 #[derive(Clone, Debug, CandidType, Deserialize)]
@@ -23,6 +24,7 @@ struct Job {
     freelancer: Option<String>, 
     proposals: Vec<Proposal>,
     status: JobStatus,
+    funded: bool,
 }
 
 #[derive(Clone, Debug, CandidType, Deserialize)]
@@ -113,6 +115,7 @@ fn post_job(title: String, description: String, budget: u64, deadline: String, c
                 freelancer: None,
                 proposals: Vec::new(),
                 status: JobStatus::Open,
+                funded: false,
             };
 
             jobs.push(new_job);
@@ -136,6 +139,12 @@ fn get_jobs(status: Option<JobStatus>) -> Vec<Job> {
         } else {
             jobs_ref.clone()
         }
+    })
+}
+#[query]
+fn get_freelancer_jobs(freelancer: String) -> Vec<Job> {
+    JOBS.with(|jobs| {
+        jobs.borrow().iter().filter(|job| job.freelancer == Some(freelancer.clone())).cloned().collect()
     })
 }
 
@@ -279,6 +288,63 @@ fn complete_job(job_id: u64, user: String) -> Result<bool, Error> {
             }
         }
         Err(Error { message: "Job not found".to_string() })
+    })
+}
+
+
+#[update]
+fn delete_job(job_id: u64, client: String) -> bool {
+    JOBS.with(|jobs| {
+        let mut jobs = jobs.borrow_mut();
+        if let Some(index) = jobs.iter().position(|job| job.id == job_id && job.client == client) {
+            jobs.remove(index);
+            true // Job deleted successfully
+        } else {
+            false // Job not found or unauthorized
+        }
+    })
+}
+
+
+
+
+// ✅ Mark job as disputed
+#[update]
+fn dispute_job(job_id: u64, user: String) -> Result<bool, Error> {
+    JOBS.with(|jobs| {
+        let mut jobs = jobs.borrow_mut();
+        for job in jobs.iter_mut() {
+            if job.id == job_id {
+                if job.client != user && job.freelancer.as_ref().unwrap_or(&"".to_string()) != &user {
+                    return Err(Error { message: "Only the client or freelancer can dispute this job".to_string() });
+                }
+                if job.status != JobStatus::InProgress {
+                    return Err(Error { message: "Only ongoing jobs can be disputed".to_string() });
+                }
+                job.status = JobStatus::Disputed;
+                return Ok(true);
+            }
+        }
+        Err(Error { message: "Job not found".to_string() })
+    })
+}
+
+// ✅ Fund a job (Placeholder for ICP token transfer integration)
+#[update]
+fn fund_job(job_id: u64, client: String) -> Result<bool, Error> {
+    JOBS.with(|jobs| {
+        let mut jobs = jobs.borrow_mut();
+        for job in jobs.iter_mut() {
+            if job.id == job_id && job.client == client {
+                if job.funded {
+                    return Err(Error { message: "Job is already funded".to_string() });
+                }
+                // TODO: Integrate ICP token transfer logic
+                job.funded = true;
+                return Ok(true);
+            }
+        }
+        Err(Error { message: "Job not found or unauthorized".to_string() })
     })
 }
 
