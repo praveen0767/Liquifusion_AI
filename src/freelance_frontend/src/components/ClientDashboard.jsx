@@ -13,22 +13,13 @@ const ClientDashboard = ({ user }) => {
   const [jobs, setJobs] = useState([]);
 
   useEffect(() => {
-    if (user) {
-      console.log("Current User Principal:", user.toString());
-      loadJobs();
-    }
-  }, [user]);
+    loadJobs();
+  }, []);
 
   const loadJobs = async () => {
     try {
-      if (!user) {
-        console.error("User not found. Please log in.");
-        return;
-      }
-      const principalId = user.toString(); // Convert Principal ID to string
-
-      console.log("Fetching jobs for freelancer:", principalId);
-      const jobList = await freelance_backend.get_jobs_by_principal(); // Call new function
+      console.log("Fetching all jobs...");
+      const jobList = await freelance_backend.get_jobs(); // ✅ Get all jobs
       setJobs(jobList);
     } catch (error) {
       console.error("Error fetching jobs:", error);
@@ -37,12 +28,11 @@ const ClientDashboard = ({ user }) => {
 
   const deleteJob = async (jobId) => {
     try {
-      const client = user.toString();
       console.log(`Attempting to delete job ID: ${jobId}`);
+      const result = await freelance_backend.delete_job(jobId);
+      console.log("Backend response:", result); // Debugging log
 
-      const result = await freelance_backend.delete_job(jobId, client);
-
-      if (typeof result === "object" && result.ok) {
+      if (typeof result === "boolean" && result) {
         alert("Job deleted successfully!");
         setJobs((prevJobs) => prevJobs.filter((job) => job.id !== jobId));
       } else {
@@ -58,10 +48,6 @@ const ClientDashboard = ({ user }) => {
     setJob({ ...job, [e.target.name]: e.target.value });
   };
 
-  if (!user) {
-    return <p>Please log in to access the client dashboard.</p>;
-  }
-
   const postJob = async () => {
     try {
       if (!job.title || !job.description || !job.budget || !job.deadline) {
@@ -73,8 +59,7 @@ const ClientDashboard = ({ user }) => {
         throw new Error("Budget must be a positive number");
       }
 
-      const userPrincipal = user.toString();
-      const clientId = userPrincipal;
+      const clientId = user.toString();
       console.log(
         "Posting job:",
         job.title,
@@ -148,21 +133,37 @@ const ClientDashboard = ({ user }) => {
       </div>
 
       <div className="job-list">
-        <h3>Your Jobs</h3>
+        <h3>All Jobs</h3>
         {jobs.length === 0 ? (
-          <p>No jobs posted yet.</p>
+          <p>No jobs available yet.</p>
         ) : (
-          jobs.map((job) => (
-            <div key={job.id} className="job-item">
-              <h4>{job.title}</h4>
-              <p>{job.description}</p>
-              <p>
-                Budget: {job.budget} ICP | Deadline: {job.deadline}
-              </p>
-              <p>Status: {job.status}</p>
-              <button onClick={() => deleteJob(job.id)}>Delete</button>
-            </div>
-          ))
+          jobs.map(
+            (
+              job // ✅ No extra {}
+            ) => (
+              <div key={job.id} className="job-item">
+                <h4>{job.title}</h4>
+                <p>{job.description}</p>
+                <p>
+                  Budget: {job.budget} ICP | Deadline: {job.deadline}
+                </p>
+
+                <button
+                  onClick={() => {
+                    if (!job.freelancer) {
+                      alert(
+                        "You cannot delete this job until a freelancer has accepted it and not done according to your expectations."
+                      );
+                    } else {
+                      deleteJob(job.id);
+                    }
+                  }}
+                >
+                  Delete
+                </button>
+              </div>
+            )
+          )
         )}
       </div>
     </div>

@@ -176,3 +176,73 @@
     gap: 0.5rem;
   }
 }
+.job-list {
+  margin-top: 20px;
+  padding: 20px;
+  background: #f9f9f9;
+  border-radius: 10px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.job-list h3 {
+  text-align: center;
+  color: #333;
+  margin-bottom: 15px;
+}
+
+/* Grid layout for job items */
+.jobs-container {
+  display: grid;
+  grid-template-columns: repeat(
+    auto-fit,
+    minmax(250px, 1fr)
+  ); /* Responsive columns */
+  gap: 15px;
+}
+
+.job-item {
+  background: white;
+  padding: 15px;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  border-left: 5px solid #007bff;
+  transition: transform 0.2s ease-in-out;
+}
+
+.job-item:hover {
+  transform: scale(1.02);
+}
+
+.job-item h4 {
+  margin: 0;
+  font-size: 18px;
+  color: #222;
+}
+
+.job-item p {
+  margin: 5px 0;
+  font-size: 14px;
+  color: #555;
+}
+
+.job-item button {
+  background: #ff4d4d;
+  color: white;
+  border: none;
+  padding: 8px 12px;
+  font-size: 14px;
+  cursor: pointer;
+  border-radius: 5px;
+  transition: background 0.3s ease;
+}
+
+.job-item button:hover {
+  background: #cc0000;
+}
+
+/* Responsive Design */
+@media (max-width: 600px) {
+  .jobs-container {
+    grid-template-columns: 1fr; /* Single column on small screens */
+  }
+}

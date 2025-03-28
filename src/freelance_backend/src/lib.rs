@@ -77,12 +77,12 @@ fn get_jobs() -> Vec<Job> {
 }
 
 #[query]
-fn get_jobs_by_principal() -> Vec<Job> {
-    let user_principal = caller().to_string(); // Get the logged-in user's Principal ID
+fn get_jobs_by_client() -> Vec<Job> {
+    let client_principal = caller().to_string(); // Get the logged-in user's Principal ID
 
     JOBS.with(|jobs| {
         jobs.borrow().iter()
-            .filter(|job| job.freelancer.as_ref().map_or(false, |f| f == &user_principal))
+            .filter(|job| job.client == client_principal)
             .cloned()
             .collect()
     })
@@ -183,17 +183,23 @@ fn get_chat(job_id: u64) -> Result<Vec<Message>, Error> {
 
 // ✅ Delete a job
 #[update]
-fn delete_job(job_id: u64, client: String) -> Result<bool, Error> {
+fn delete_job(job_id: u64) -> Result<bool, Error> {
     JOBS.with(|jobs| {
         let mut jobs = jobs.borrow_mut();
-        if let Some(index) = jobs.iter().position(|job| job.id == job_id && job.client == client) {
+        ic_cdk::println!("Deleting job with ID: {}", job_id); // Debugging log
+
+        if let Some(index) = jobs.iter().position(|job| job.id == job_id) {
             jobs.remove(index);
+            ic_cdk::println!("Job deleted successfully.");
             Ok(true)
         } else {
-            Err(Error { message: "Job not found or unauthorized".to_string() })
+            ic_cdk::println!("Job not found.");
+            Err(Error { message: "Job not found".to_string() })
         }
     })
 }
+
+
 
 // ✅ Fund a job (Placeholder for ICP token transfer integration)
 #[update]

@@ -20,12 +20,16 @@ const App = () => {
         <div className="header-content">
           <h1 className="logo">FreelanceHub</h1>
           <div className="header-buttons">
-            {/* <button
-              onClick={() => setRole(role === "client" ? "freelancer" : "client")}
-              className="switch-btn"
-            >
-              Switch to {role === "client" ? "Freelancer" : "Client"}
-            </button> */}
+            {
+              <button
+                onClick={() =>
+                  setRole(role === "client" ? "freelancer" : "client")
+                }
+                className="switch-btn"
+              >
+                Switch to {role === "client" ? "Freelancer" : "Client"}
+              </button>
+            }
             <button
               onClick={() => (user ? logout(setUser) : login(setUser))}
               className="login-btn"
