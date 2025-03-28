@@ -1,28 +1,34 @@
 import React, { useState, useEffect } from "react";
 import "./ClientDashboard.css";
 import { freelance_backend } from "../../../declarations/freelance_backend";
-import { Principal } from "@dfinity/principal";
 
 const ClientDashboard = ({ user }) => {
-  useEffect(() => {
-    console.log("Current User Principal:", user ? user.toString() : "No user");
-  }, [user]);
-
   const [job, setJob] = useState({
     title: "",
     description: "",
     budget: "",
     deadline: "",
   });
+
   const [jobs, setJobs] = useState([]);
 
   useEffect(() => {
-    loadJobs();
-  }, []);
+    if (user) {
+      console.log("Current User Principal:", user.toString());
+      loadJobs();
+    }
+  }, [user]);
 
   const loadJobs = async () => {
     try {
-      const jobList = await freelance_backend.get_jobs();
+      if (!user) {
+        console.error("User not found. Please log in.");
+        return;
+      }
+      const principalId = user.toString(); // Convert Principal ID to string
+
+      console.log("Fetching jobs for freelancer:", principalId);
+      const jobList = await freelance_backend.get_jobs_by_principal(); // Call new function
       setJobs(jobList);
     } catch (error) {
       console.error("Error fetching jobs:", error);
@@ -31,40 +37,20 @@ const ClientDashboard = ({ user }) => {
 
   const deleteJob = async (jobId) => {
     try {
+      const client = user.toString();
       console.log(`Attempting to delete job ID: ${jobId}`);
 
-    const result = await freelance_backend.delete_job(jobId);
+      const result = await freelance_backend.delete_job(jobId, client);
 
-    console.log("Backend response:", result);
-
-    if (result === true || result.ok) {  // Handle both `true` and `Result` types
-      alert("Job deleted successfully!");
-      setJobs((prevJobs) => prevJobs.filter((job) => job.jobId !== jobId)); // Update UI
-    } else {
-      throw new Error(result.err || "Failed to delete job");
-    }
-  } catch (error) {
-    console.error("Error deleting job:", error);
-    alert(`Error: ${error.message}`);
-  }
-  };
-  
-
-  const raiseDispute = async (jobId) => {
-    try {
-      await freelance_backend.raise_dispute(jobId);
-      alert("Dispute raised successfully!");
+      if (typeof result === "object" && result.ok) {
+        alert("Job deleted successfully!");
+        setJobs((prevJobs) => prevJobs.filter((job) => job.id !== jobId));
+      } else {
+        throw new Error(result.err?.message || "Failed to delete job");
+      }
     } catch (error) {
-      console.error("Error raising dispute:", error);
-    }
-  };
-
-  const lockFunds = async (jobId) => {
-    try {
-      await freelance_backend.lock_funds(jobId);
-      alert("Funds locked successfully!");
-    } catch (error) {
-      console.error("Error locking funds:", error);
+      console.error("Error deleting job:", error);
+      alert(`Error: ${error.message}`);
     }
   };
 
@@ -73,38 +59,55 @@ const ClientDashboard = ({ user }) => {
   };
 
   if (!user) {
-    alert("User not logged in!");
-    return;
+    return <p>Please log in to access the client dashboard.</p>;
   }
 
   const postJob = async () => {
     try {
-      if (!user) throw new Error("User is not authenticated");
-      if (!job.title || !job.description || !job.budget || !job.deadline)
+      if (!job.title || !job.description || !job.budget || !job.deadline) {
         throw new Error("All fields are required");
+      }
 
-      const budgetNum = BigInt(job.budget);
+      const budgetNum = Number(job.budget);
+      if (isNaN(budgetNum) || budgetNum <= 0) {
+        throw new Error("Budget must be a positive number");
+      }
+
       const userPrincipal = user.toString();
+      const clientId = userPrincipal;
+      console.log(
+        "Posting job:",
+        job.title,
+        job.description,
+        budgetNum,
+        job.deadline,
+        clientId
+      );
 
       const result = await freelance_backend.post_job(
         job.title,
         job.description,
         budgetNum,
         job.deadline,
-        userPrincipal
+        clientId
       );
 
-      if (result.ok !== undefined) {
-        alert(`Job posted successfully! Job ID: ${result.ok}`);
-        setJob({ title: "", description: "", budget: "", deadline: "" });
-        loadJobs();
-      } else {
+      if (typeof result === "object" && result.err) {
         throw new Error(result.err.message || "Job posting failed");
       }
+
+      alert(`Job posted successfully! Job ID: ${result}`);
+      setJob({ title: "", description: "", budget: "", deadline: "" });
+      loadJobs();
     } catch (error) {
       console.error("Job posting error:", error);
       alert(`Job posting failed: ${error.message}`);
     }
+  };
+
+  const onSubmit = async (e) => {
+    e.preventDefault();
+    await postJob();
   };
 
   return (
@@ -113,17 +116,18 @@ const ClientDashboard = ({ user }) => {
 
       <div className="job-form">
         <h3>Post a Job</h3>
-        <form
-          onSubmit={(e) => {
-            e.preventDefault();
-            postJob();
-          }}
-        >
+        <form onSubmit={onSubmit}>
           <input
             type="text"
             name="title"
             placeholder="Job Title"
             value={job.title}
+            onChange={handleChange}
+          />
+          <textarea
+            name="description"
+            placeholder="Job Description"
+            value={job.description}
             onChange={handleChange}
           />
           <input
@@ -139,37 +143,26 @@ const ClientDashboard = ({ user }) => {
             value={job.deadline}
             onChange={handleChange}
           />
-          <textarea
-            name="description"
-            placeholder="Job Description"
-            value={job.description}
-            onChange={handleChange}
-          />
           <button type="submit">Post Job</button>
         </form>
       </div>
 
       <div className="job-list">
-        <h3>Your Posted Jobs</h3>
+        <h3>Your Jobs</h3>
         {jobs.length === 0 ? (
           <p>No jobs posted yet.</p>
         ) : (
-          <ul>
-            {jobs.map((j, index) => (
-              <li key={index}>
-                <strong>{j.title}</strong>  {j.description} <br />
-                <span>
-                  Budget: {j.budget} ICP | Deadline: {j.deadline}
-                </span>
-                <br />
-                <button onClick={() => deleteJob(j.jobId)}>Delete</button>
-                <button onClick={() => raiseDispute(j.jobId)}>
-                  Raise Dispute
-                </button>
-                <button onClick={() => lockFunds(j.jobId)}>Lock Funds</button>
-              </li>
-            ))}
-          </ul>
+          jobs.map((job) => (
+            <div key={job.id} className="job-item">
+              <h4>{job.title}</h4>
+              <p>{job.description}</p>
+              <p>
+                Budget: {job.budget} ICP | Deadline: {job.deadline}
+              </p>
+              <p>Status: {job.status}</p>
+              <button onClick={() => deleteJob(job.id)}>Delete</button>
+            </div>
+          ))
         )}
       </div>
     </div>

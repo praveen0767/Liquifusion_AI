@@ -71,3 +71,8 @@ button:hover {
   width: 100%;
   box-sizing: border-box;
 }
+
+// Smooth scrolling for better user experience
+html {
+  scroll-behavior: smooth;
+}

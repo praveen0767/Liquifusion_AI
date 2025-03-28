@@ -1,8 +1,34 @@
+type Error = record { message : text };
+type Job = record {
+  id : nat64;
+  client : text;
+  title : text;
+  description : text;
+  deadline : text;
+  funded : bool;
+  proposals : vec Proposal;
+  budget : nat64;
+  freelancer : opt text;
+};
+type Message = record { content : text; sender : text; timestamp : nat64 };
+type Proposal = record {
+  expected_budget : nat64;
+  is_accepted : bool;
+  cover_letter : text;
+  freelancer : text;
+};
+type Result = variant { Ok : bool; Err : Error };
+type Result_1 = variant { Ok : vec Message; Err : Error };
+type Result_2 = variant { Ok : nat64; Err : Error };
 service : {
-  "post_job": (text, text, nat64, text, text) -> (nat64);
-  "get_jobs": () -> (vec record { id: nat64; title: text; description: text; budget: nat64; deadline: text; client: text; freelancer: opt text; proposals: vec record { freelancer: text; cover_letter: text; expected_budget: nat64; }; });
-  "submit_proposal": (nat64, text, text, nat64) -> (bool);
-  "accept_proposal": (nat64, text) -> (bool);
-  "send_message": (nat64, text, text, nat64) -> (bool);
-  "get_chat": (nat64) -> (vec record { sender: text; content: text; timestamp: nat64; });
+  accept_proposal : (nat64, text) -> (Result);
+  delete_job : (nat64, text) -> (Result);
+  fund_job : (nat64, text) -> (Result);
+  get_chat : (nat64) -> (Result_1) query;
+  get_freelancer_jobs : (text) -> (vec Job) query;
+  get_jobs : () -> (vec Job) query;
+  get_jobs_by_principal : () -> (vec Job) query;
+  post_job : (text, text, nat64, text, text) -> (Result_2);
+  send_message : (nat64, text, text, nat64) -> (Result);
+  submit_proposal : (nat64, text, text, nat64) -> (Result);
 }
