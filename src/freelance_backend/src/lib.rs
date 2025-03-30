@@ -16,6 +16,7 @@ struct Job {
     freelancer: Option<String>, 
     proposals: Vec<Proposal>,
     funded: bool,
+    chat: Option<Chat>,
 }
 
 #[derive(Clone, Debug, CandidType, Deserialize)]
@@ -25,13 +26,19 @@ struct Proposal {
     expected_budget: u64,
     is_accepted: bool,
 }
-
 #[derive(Clone, Debug, CandidType, Deserialize)]
 struct Message {
     sender: String,
     content: String,
     timestamp: u64,
 }
+
+#[derive(Clone, Debug, CandidType, Deserialize)]
+struct Chat {
+    participants: Vec<String>,
+    messages: Vec<Message>,
+}
+
 
 #[derive(Clone, Debug, CandidType, Deserialize)]
 struct Error {
@@ -60,6 +67,7 @@ fn post_job(title: String, description: String, budget: u64, deadline: String, c
                 freelancer: None,
                 proposals: Vec::new(),
                 funded: false,
+                chat: None,
             };
 
             jobs.borrow_mut().push(new_job);
@@ -156,32 +164,61 @@ fn accept_proposal(job_id: u64, freelancer: String) -> Result<bool, Error> {
     })
 }
 
-// ✅ Send message in chat
+#[query]
+fn get_chat(job_id: u64) -> Result<Chat, Error> {
+    JOBS.with(|jobs| {
+        let jobs = jobs.borrow();
+        if let Some(job) = jobs.iter().find(|j| j.id == job_id) {
+            if let Some(chat) = &job.chat {
+                return Ok(chat.clone());
+            }
+            return Err(Error { message: "Chat not found".to_string() });
+        }
+        Err(Error { message: "Job not found".to_string() })
+    })
+}
+
 #[update]
-fn send_message(job_id: u64, sender: String, content: String, timestamp: u64) -> Result<bool, Error> {
-    CHAT_HISTORY.with(|chat| {
-        let mut chat = chat.borrow_mut();
-        if let Some(messages) = chat.get_mut(&job_id) {
-            messages.push(Message { sender, content, timestamp });
+fn reject_proposal(job_id: u64, freelancer: String) -> Result<bool, Error> {
+    JOBS.with(|jobs| {
+        let mut jobs = jobs.borrow_mut();
+        if let Some(job) = jobs.iter_mut().find(|j| j.id == job_id) {
+            let original_len = job.proposals.len();
+            job.proposals.retain(|p| p.freelancer != freelancer);
+
+            if job.proposals.len() < original_len {
+                return Ok(true);
+            } else {
+                return Err(Error { message: "Proposal not found".to_string() });
+            }
+        }
+        Err(Error { message: "Job not found".to_string() })
+    })
+}
+
+#[update]
+fn start_chat(job_id: u64, freelancer: String) -> Result<bool, Error> {
+    JOBS.with(|jobs| {
+        let mut jobs = jobs.borrow_mut();
+        if let Some(job) = jobs.iter_mut().find(|j| j.id == job_id) {
+            if job.freelancer.as_ref() != Some(&freelancer) {
+                return Err(Error { message: "Freelancer is not assigned to this job".to_string() });
+            }
+
+            job.chat = Some(Chat {
+                participants: vec![job.client.clone(), freelancer.clone()],
+                messages: vec![],
+            });
+
             Ok(true)
         } else {
-            Err(Error { message: "Chat history not initialized".to_string() })
+            Err(Error { message: "Job not found".to_string() })
         }
     })
 }
 
-// ✅ Get chat history for a job
-#[query]
-fn get_chat(job_id: u64) -> Result<Vec<Message>, Error> {
-    CHAT_HISTORY.with(|chat| {
-        chat.borrow()
-            .get(&job_id)
-            .cloned()
-            .ok_or_else(|| Error { message: "No chat history found for this job".to_string() })
-    })
-}
 
-// ✅ Delete a job
+
 #[update]
 fn delete_job(job_id: u64) -> Result<bool, Error> {
     JOBS.with(|jobs| {
@@ -189,6 +226,10 @@ fn delete_job(job_id: u64) -> Result<bool, Error> {
         ic_cdk::println!("Deleting job with ID: {}", job_id); // Debugging log
 
         if let Some(index) = jobs.iter().position(|job| job.id == job_id) {
+            if jobs[index].freelancer.is_some() {
+                return Err(Error { message: "Cannot delete job with an assigned freelancer".to_string() });
+            }
+
             jobs.remove(index);
             ic_cdk::println!("Job deleted successfully.");
             Ok(true)
@@ -198,6 +239,7 @@ fn delete_job(job_id: u64) -> Result<bool, Error> {
         }
     })
 }
+
 
 
 

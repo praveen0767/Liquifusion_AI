@@ -19,24 +19,89 @@ const ClientDashboard = ({ user }) => {
   const loadJobs = async () => {
     try {
       console.log("Fetching all jobs...");
-      const jobList = await freelance_backend.get_jobs(); // ✅ Get all jobs
+      const jobList = await freelance_backend.get_jobs();
+      console.log("Jobs with proposals:", jobList);
       setJobs(jobList);
     } catch (error) {
       console.error("Error fetching jobs:", error);
     }
   };
 
-  const deleteJob = async (jobId) => {
+  const acceptProposal = async (jobId, freelancerId) => {
     try {
-      console.log(`Attempting to delete job ID: ${jobId}`);
-      const result = await freelance_backend.delete_job(jobId);
-      console.log("Backend response:", result); // Debugging log
+      console.log(
+        `Accepting proposal for Job ID: ${jobId}, Freelancer: ${freelancerId}`
+      );
 
-      if (typeof result === "boolean" && result) {
-        alert("Job deleted successfully!");
-        setJobs((prevJobs) => prevJobs.filter((job) => job.id !== jobId));
+      const response = await freelance_backend.accept_proposal(
+        BigInt(jobId),
+        freelancerId
+      );
+
+      if ("Ok" in response) {
+        alert("Proposal accepted! Chat initiated.");
+
+        const freelancerPrincipal = freelancerId.toString();
+
+        const chatResponse = await freelance_backend.start_chat(
+          BigInt(jobId),
+          freelancerPrincipal
+        );
+
+        if ("Ok" in chatResponse) {
+          alert("Chat successfully initiated!");
+        } else {
+          throw new Error(chatResponse.Err);
+        }
+
+        loadJobs(); // Refresh job list
       } else {
-        throw new Error(result.err?.message || "Failed to delete job");
+        throw new Error(response.Err);
+      }
+    } catch (error) {
+      console.error("Error accepting proposal:", error);
+      alert(`Error: ${error.message}`);
+    }
+  };
+
+  const rejectProposal = async (jobId, freelancerId) => {
+    try {
+      console.log(
+        `Rejecting proposal for Job ID: ${jobId}, Freelancer: ${freelancerId}`
+      );
+
+      const response = await freelance_backend.reject_proposal(
+        BigInt(jobId),
+        freelancerId
+      );
+
+      if ("Ok" in response) {
+        alert("Proposal rejected successfully!");
+        loadJobs(); // Refresh job list after rejection
+      } else {
+        throw new Error(response.Err);
+      }
+    } catch (error) {
+      console.error("Error rejecting proposal:", error);
+      alert(`Error: ${error.message}`);
+    }
+  };
+
+  const deleteJob = async (jobId) => {
+    console.log(`Attempting to delete job ID: ${jobId}`);
+
+    try {
+      const result = await freelance_backend.delete_job(BigInt(jobId)); // ✅ Convert to BigInt
+
+      console.log("Backend response:", result); // ✅ Log the response
+
+      if ("Ok" in result && result.Ok === true) {
+        alert("Job deleted successfully!");
+        setJobs((prevJobs) => prevJobs.filter((job) => job.id !== jobId)); // ✅ Remove from UI
+      } else if ("Err" in result) {
+        throw new Error(result.Err.message);
+      } else {
+        throw new Error("Unexpected response from backend.");
       }
     } catch (error) {
       console.error("Error deleting job:", error);
@@ -133,37 +198,68 @@ const ClientDashboard = ({ user }) => {
       </div>
 
       <div className="job-list">
-        <h3>All Jobs</h3>
+        <h3>Your Jobs</h3>
         {jobs.length === 0 ? (
-          <p>No jobs available yet.</p>
+          <p>No jobs posted yet.</p>
         ) : (
-          jobs.map(
-            (
-              job // ✅ No extra {}
-            ) => (
-              <div key={job.id} className="job-item">
-                <h4>{job.title}</h4>
-                <p>{job.description}</p>
-                <p>
-                  Budget: {job.budget} ICP | Deadline: {job.deadline}
-                </p>
+          jobs.map((job) => (
+            <div key={job.id} className="job-item">
+              <h4>{job.title}</h4>
+              <p>{job.description}</p>
+              <p>
+                💰 Budget: {Number(job.budget) || 0} ICP | 📅 Deadline:{" "}
+                {job.deadline}
+              </p>
 
-                <button
-                  onClick={() => {
-                    if (!job.freelancer) {
-                      alert(
-                        "You cannot delete this job until a freelancer has accepted it and not done according to your expectations."
-                      );
-                    } else {
-                      deleteJob(job.id);
-                    }
-                  }}
-                >
-                  Delete
-                </button>
-              </div>
-            )
-          )
+              {job.freelancer ? (
+                <p>✅ Assigned to: {job.freelancer}</p>
+              ) : job.proposals.length > 0 ? (
+                <ul className="proposal-list">
+                  {job.proposals.map((proposal, index) => (
+                    <li key={index} className="proposal-item">
+                      <p>📩 From: {proposal.freelancer}</p>
+                      <p>💬 Cover Letter: {proposal.cover_letter}</p>
+                      <div className="proposal-buttons">
+                        <button
+                          className="accept-btn"
+                          onClick={() =>
+                            acceptProposal(job.id, proposal.freelancer)
+                          }
+                        >
+                          ✅ Accept
+                        </button>
+                        <button
+                          className="reject-btn"
+                          onClick={() =>
+                            rejectProposal(job.id, proposal.freelancer)
+                          }
+                        >
+                          ❌ Reject
+                        </button>
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <p>No proposals yet.</p>
+              )}
+              {/* 🔹 Delete job button */}
+              <button
+                className="delete-btn"
+                onClick={() => {
+                  if (!job.freelancer) {
+                    alert(
+                      "You cannot delete this job. A freelancer is already assigned."
+                    );
+                  } else {
+                    deleteJob(job.id);
+                  }
+                }}
+              >
+                🗑️ Delete
+              </button>
+            </div>
+          ))
         )}
       </div>
     </div>
