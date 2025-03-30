@@ -14,7 +14,6 @@ type Job = record {
 };
 type Message = record { content : text; sender : text; timestamp : nat64 };
 type Proposal = record {
-  expected_budget : nat64;
   is_accepted : bool;
   cover_letter : text;
   freelancer : text;

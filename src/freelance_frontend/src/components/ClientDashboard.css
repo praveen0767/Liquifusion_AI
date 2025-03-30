@@ -4,30 +4,28 @@
   margin: 0 auto;
   padding: 2rem;
   font-family: "Arial", sans-serif;
-  background-color: #eef2f7; /* Soft blue-gray background */
+  background-color: #f5f7fa;
   min-height: 100vh;
 }
 
 .client-dashboard h2 {
-  color: #1e3a8a; /* Deep blue */
+  color: #2c3e50;
   text-align: center;
   margin-bottom: 2rem;
   font-size: 2.5rem;
-  animation: slideInFromTop 0.5s ease-out;
 }
 
-/* Job Form Styling */
+/* Job Form Styling (unchanged) */
 .job-form {
   background: white;
   padding: 2rem;
   border-radius: 12px;
-  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
   margin-bottom: 2rem;
-  animation: fadeIn 0.6s ease-in;
 }
 
 .job-form h3 {
-  color: #3b82f6; /* Bright blue */
+  color: #34495e;
   margin-bottom: 1.5rem;
   font-size: 1.8rem;
 }
@@ -41,16 +39,15 @@
 .job-form textarea {
   width: 100%;
   padding: 0.8rem;
-  border: 2px solid #d1d5db; /* Light gray */
+  border: 2px solid #ddd;
   border-radius: 8px;
   font-size: 1rem;
-  transition: all 0.3s ease;
+  transition: border-color 0.3s ease;
 }
 
 .job-form input:focus,
 .job-form textarea:focus {
-  border-color: #3b82f6; /* Bright blue */
-  box-shadow: 0 0 8px rgba(59, 130, 246, 0.3);
+  border-color: #3498db;
   outline: none;
 }
 
@@ -60,19 +57,18 @@
 }
 
 .job-form button {
-  background-color: #10b981; /* Emerald green */
+  background-color: #2ecc71;
   color: white;
   padding: 0.8rem 1.5rem;
   border: none;
   border-radius: 8px;
   font-size: 1rem;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: background-color 0.3s ease;
 }
 
 .job-form button:hover {
-  background-color: #059669; /* Darker green */
-  transform: scale(1.05);
+  background-color: #27ae60;
 }
 
 /* Job List Table Styling */
@@ -81,7 +77,7 @@
 }
 
 .job-list h3 {
-  color: #3b82f6; /* Bright blue */
+  color: #34495e;
   margin-bottom: 1.5rem;
   font-size: 1.8rem;
 }
@@ -91,13 +87,12 @@
   border-collapse: collapse;
   background: white;
   border-radius: 12px;
-  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
   overflow: hidden;
-  animation: fadeIn 0.6s ease-in;
 }
 
 .jobs-table thead {
-  background-color: #1e3a8a; /* Deep blue */
+  background-color: #3498db;
   color: white;
 }
 
@@ -109,27 +104,26 @@
 }
 
 .jobs-table tbody tr {
-  border-bottom: 1px solid #e5e7eb; /* Light gray */
-  transition: all 0.3s ease;
+  border-bottom: 1px solid #eee;
+  transition: background-color 0.2s ease;
 }
 
 .jobs-table tbody tr:hover {
-  background-color: #f1f5f9; /* Light blue-gray */
-  transform: translateY(-2px);
+  background-color: #f9f9f9;
 }
 
 .jobs-table td {
   padding: 1rem;
   vertical-align: top;
-  color: #4b5563; /* Dark gray */
+  color: #7f8c8d;
 }
 
 .jobs-table td:first-child {
-  color: #3b82f6; /* Bright blue */
+  color: #2980b9;
   font-weight: 500;
 }
 
-/* Proposal List Styling */
+/* Proposal List Styling within Table */
 .proposal-list {
   list-style: none;
   padding: 0;
@@ -137,17 +131,11 @@
 }
 
 .proposal-item {
-  border: 1px solid #e5e7eb;
+  border: 1px solid #eee;
   padding: 0.8rem;
   border-radius: 8px;
   margin-bottom: 0.5rem;
-  background-color: #f9fafb; /* Very light gray */
-  transition: all 0.3s ease;
-}
-
-.proposal-item:hover {
-  border-color: #3b82f6;
-  box-shadow: 0 0 6px rgba(59, 130, 246, 0.2);
+  background-color: #fafafa;
 }
 
 .proposal-item p {
@@ -174,88 +162,40 @@
 }
 
 .accept-btn {
-  background-color: #10b981; /* Emerald green */
+  background-color: #2ecc71;
   color: white;
 }
 
 .accept-btn:hover {
-  background-color: #059669; /* Darker green */
-  transform: scale(1.05);
+  background-color: #27ae60;
 }
 
 .reject-btn {
-  background-color: #ef4444; /* Red */
+  background-color: #e74c3c;
   color: white;
 }
 
 .reject-btn:hover {
-  background-color: #dc2626; /* Darker red */
-  transform: scale(1.05);
+  background-color: #c0392b;
 }
 
 .delete-btn {
-  background-color: #6b7280; /* Gray */
+  background-color: #95a5a6;
   color: white;
 }
 
 .delete-btn:hover {
-  background-color: #4b5563; /* Darker gray */
-  transform: scale(1.05);
+  background-color: #7f8c8d;
 }
 
 /* No Jobs Message */
 .no-jobs {
   text-align: center;
-  color: #4b5563;
+  color: #7f8c8d;
   padding: 2rem;
   background: white;
   border-radius: 12px;
-  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
-  animation: fadeIn 0.6s ease-in;
-}
-
-/* Animations */
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
-}
-
-@keyframes slideInFromTop {
-  from {
-    opacity: 0;
-    transform: translateY(-20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-@keyframes bounceIn {
-  0% {
-    transform: scale(0.95);
-    opacity: 0;
-  }
-  60% {
-    transform: scale(1.05);
-    opacity: 1;
-  }
-  100% {
-    transform: scale(1);
-  }
-}
-
-/* Apply animations */
-.jobs-table tbody tr {
-  animation: bounceIn 0.5s ease-out;
-}
-
-.proposal-item {
-  animation: fadeIn 0.4s ease-in;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
 /* Responsive Design */
@@ -281,4 +221,116 @@
   .proposal-buttons {
     flex-direction: column;
   }
+}
+
+/* Animation */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.jobs-table {
+  animation: fadeIn 0.5s ease-in;
+}
+/* Client Dashboard Styles */
+.job-list {
+  width: 80%;
+  margin: 20px auto;
+  padding: 20px;
+  background-color: #f9f9f9;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+h3 {
+  text-align: center;
+  font-size: 24px;
+  color: #333;
+}
+
+.job-item {
+  background: #fff;
+  padding: 15px;
+  margin-bottom: 15px;
+  border-radius: 8px;
+  border: 1px solid #ddd;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.job-item h4 {
+  font-size: 20px;
+  color: #222;
+  margin-bottom: 8px;
+}
+
+.job-item p {
+  font-size: 16px;
+  color: #555;
+}
+
+.proposal-list {
+  list-style: none;
+  padding: 0;
+}
+
+.proposal-item {
+  background: #eef;
+  padding: 10px;
+  margin-top: 10px;
+  border-radius: 6px;
+  border-left: 4px solid #007bff;
+}
+
+.proposal-buttons {
+  margin-top: 10px;
+  display: flex;
+  gap: 10px;
+}
+
+.accept-btn {
+  background: #28a745;
+  color: #fff;
+  border: none;
+  padding: 8px 12px;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background 0.3s;
+}
+
+.accept-btn:hover {
+  background: #218838;
+}
+
+.reject-btn {
+  background: #dc3545;
+  color: #fff;
+  border: none;
+  padding: 8px 12px;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background 0.3s;
+}
+
+.reject-btn:hover {
+  background: #c82333;
+}
+
+.delete-btn {
+  background: #ff9800;
+  color: #fff;
+  border: none;
+  padding: 8px 12px;
+  border-radius: 5px;
+  cursor: pointer;
+  display: block;
+  margin-top: 15px;
+  transition: background 0.3s;
+}
+
+.delete-btn:hover {
+  background: #e68900;
 }

@@ -49,19 +49,22 @@ const FreelancerDashboard = ({ user }) => {
 
       console.log(`Submitting proposal for Job ID: ${jobId}`);
 
-      const freelancerId = "freelancer_123"; // ✅ Replace with actual logged-in user ID or use default
+      const freelancerId = "freelancer_123"; // Replace with actual freelancer ID
 
-      // Call backend with (jobId, freelancerId, coverLetter)
       const response = await freelance_backend.submit_proposal(
-        BigInt(jobId), // ✅ Convert job ID to BigInt (nat64)
-        freelancerId, // ✅ Correctly pass as text
-        coverLetter // ✅ Correctly pass as text
+        BigInt(jobId),
+        freelancerId,
+        coverLetter
       );
 
       console.log("Proposal Submission Response:", response);
 
       if ("Ok" in response) {
         alert("Proposal submitted successfully!");
+        setProposals((prev) => ({
+          ...prev,
+          [jobId]: true,
+        }));
       } else {
         throw new Error(response.Err);
       }
@@ -71,6 +74,40 @@ const FreelancerDashboard = ({ user }) => {
     }
   };
 
+  const loadChat = async (jobId) => {
+    setSelectedJobId(jobId);
+    try {
+      const response = await freelance_backend.get_chat(BigInt(jobId));
+      if ("Ok" in response) {
+        setChat(response.Ok.messages);
+      } else {
+        throw new Error(response.Err);
+      }
+    } catch (error) {
+      console.error("Error loading chat:", error);
+    }
+  };
+
+  // ✅ Send a message
+  const sendMessage = async () => {
+    if (!message.trim()) return;
+    try {
+      const response = await freelance_backend.send_message(
+        BigInt(selectedJobId),
+        userPrincipal,
+        message
+      );
+      if ("Ok" in response) {
+        console.log("Message sent successfully!");
+        setMessage("");
+        loadChat(selectedJobId);
+      } else {
+        throw new Error(response.Err);
+      }
+    } catch (error) {
+      console.error("Error sending message:", error);
+    }
+  };
   return (
     <div className="freelancer-dashboard">
       <h2>Freelancer Dashboard</h2>

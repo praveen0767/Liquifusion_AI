@@ -21,9 +21,10 @@ const ClientDashboard = ({ user }) => {
       console.log("Fetching all jobs...");
       const jobList = await freelance_backend.get_jobs();
 
-      // Debug: Check if proposals are coming from the backend
+      // Debugging: Log each job and its proposals
       jobList.forEach((job) => {
-        console.log(`Job ID: ${job.id}, Proposals:`, job.proposals);
+        console.log(`Job ID: ${job.id}`);
+        console.log("Proposals:", job.proposals); // Log proposals
       });
 
       setJobs(jobList);
@@ -31,7 +32,49 @@ const ClientDashboard = ({ user }) => {
       console.error("Error fetching jobs:", error);
     }
   };
+  const fetchMyJobs = async () => {
+    try {
+      const assignedJobs = await freelance_backend.get_jobs(user);
+      setJobs(assignedJobs);
+    } catch (error) {
+      console.error("Error fetching client jobs:", error);
+    }
+  };
 
+  const loadChat = async (jobId) => {
+    setSelectedJobId(jobId);
+    try {
+      const response = await freelance_backend.get_chat(BigInt(jobId));
+      if ("Ok" in response) {
+        setChat(response.Ok.messages);
+      } else {
+        throw new Error(response.Err);
+      }
+    } catch (error) {
+      console.error("Error loading chat:", error);
+    }
+  };
+
+  // ✅ Send a message
+  const sendMessage = async () => {
+    if (!message.trim()) return;
+    try {
+      const response = await freelance_backend.send_message(
+        BigInt(selectedJobId),
+        userPrincipal,
+        message
+      );
+      if ("Ok" in response) {
+        console.log("Message sent successfully!");
+        setMessage("");
+        loadChat(selectedJobId);
+      } else {
+        throw new Error(response.Err);
+      }
+    } catch (error) {
+      console.error("Error sending message:", error);
+    }
+  };
   const acceptProposal = async (jobId, freelancerId) => {
     try {
       console.log(
@@ -44,22 +87,8 @@ const ClientDashboard = ({ user }) => {
       );
 
       if ("Ok" in response) {
-        alert("Proposal accepted! Chat initiated.");
-
-        const freelancerPrincipal = freelancerId.toString();
-
-        const chatResponse = await freelance_backend.start_chat(
-          BigInt(jobId),
-          freelancerPrincipal
-        );
-
-        if ("Ok" in chatResponse) {
-          alert("Chat successfully initiated!");
-        } else {
-          throw new Error(chatResponse.Err);
-        }
-
-        loadJobs(); // Refresh job list
+        alert("Proposal accepted successfully! Chat started.");
+        await loadJobs(); // ✅ Refresh job list after accepting proposal
       } else {
         throw new Error(response.Err);
       }
@@ -82,7 +111,7 @@ const ClientDashboard = ({ user }) => {
 
       if ("Ok" in response) {
         alert("Proposal rejected successfully!");
-        loadJobs(); // Refresh job list after rejection
+        await loadJobs(); // ✅ Refresh job list after rejection
       } else {
         throw new Error(response.Err);
       }
@@ -91,23 +120,13 @@ const ClientDashboard = ({ user }) => {
       alert(`Error: ${error.message}`);
     }
   };
-
   const deleteJob = async (jobId) => {
-    console.log(`Attempting to delete job ID: ${jobId}`);
-
     try {
-      const result = await freelance_backend.delete_job(BigInt(jobId)); // ✅ Convert to BigInt
+      await freelance_backend.delete_job(BigInt(jobId)); // ✅ Call backend
 
-      console.log("Backend response:", result); // ✅ Log the response
+      setJobs((prevJobs) => prevJobs.filter((job) => job.id !== jobId)); // ✅ Remove from UI instantly
 
-      if ("Ok" in result && result.Ok === true) {
-        alert("Job deleted successfully!");
-        setJobs((prevJobs) => prevJobs.filter((job) => job.id !== jobId)); // ✅ Remove from UI
-      } else if ("Err" in result) {
-        throw new Error(result.Err.message);
-      } else {
-        throw new Error("Unexpected response from backend.");
-      }
+      alert("Job deleted successfully!");
     } catch (error) {
       console.error("Error deleting job:", error);
       alert(`Error: ${error.message}`);
@@ -216,15 +235,17 @@ const ClientDashboard = ({ user }) => {
                 {job.deadline}
               </p>
 
-              {job.freelancer ? (
-                <p> {job.freelancer}</p>
-              ) : job.proposals && job.proposals.length > 0 ? (
+              {job.proposals && job.proposals.length > 0 ? (
                 <ul className="proposal-list">
                   {job.proposals.map((proposal, index) => (
                     <li key={index} className="proposal-item">
-                      <p>📩 From: {proposal.freelancer.toString()}</p>{" "}
-                      {/* Ensure freelancer is a string */}
-                      <p>💬 Cover Letter: {proposal.cover_letter}</p>
+                      <p>
+                        📩 From: {proposal.freelancer?.toString() || "Unknown"}
+                      </p>
+                      <p>
+                        💬 Cover Letter:{" "}
+                        {proposal.cover_letter || "No cover letter provided"}
+                      </p>
                       <div className="proposal-buttons">
                         <button
                           className="accept-btn"
@@ -249,18 +270,11 @@ const ClientDashboard = ({ user }) => {
               ) : (
                 <p>No proposals yet.</p>
               )}
+
               {/* 🔹 Delete job button */}
               <button
                 className="delete-btn"
-                onClick={() => {
-                  if (!job.freelancer) {
-                    alert(
-                      "You cannot delete this job. A freelancer is already assigned."
-                    );
-                  } else {
-                    deleteJob(job.id);
-                  }
-                }}
+                onClick={() => deleteJob(job.id)} // ✅ Directly delete job
               >
                 🗑️ Delete
               </button>

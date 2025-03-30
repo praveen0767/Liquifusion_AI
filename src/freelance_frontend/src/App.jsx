@@ -120,7 +120,9 @@ const App = () => {
 
         {/* FAQ Section */}
         <section className="faq-section fade-in">
-          <h2 className="section-title">Frequently Asked Questions</h2>
+          <h2 className="section-title" style={{ textAlign: "center" }}>
+            Frequently Asked Questions
+          </h2>
           <div className="faq-list">
             <div className="faq-item">
               <h3 className="faq-question">What is FreelanceHub?</h3>

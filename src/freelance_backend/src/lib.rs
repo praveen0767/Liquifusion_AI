@@ -23,7 +23,7 @@ struct Job {
 struct Proposal {
     freelancer: String,
     cover_letter: String,
-    expected_budget: u64,
+
     is_accepted: bool,
 }
 #[derive(Clone, Debug, CandidType, Deserialize)]
@@ -86,7 +86,7 @@ fn get_jobs() -> Vec<Job> {
 
 #[query]
 fn get_jobs_by_client() -> Vec<Job> {
-    let client_principal = caller().to_text(); // Get the logged-in user's Principal ID
+    let client_principal = caller().to_string(); // Get the logged-in user's Principal ID
 
     JOBS.with(|jobs| {
         jobs.borrow().iter()
@@ -124,7 +124,6 @@ fn submit_proposal(job_id: u64, freelancer: String, cover_letter: String) -> Res
                 job.proposals.push(Proposal {
                     freelancer,
                     cover_letter,
-                    expected_budget: 0, // Replace 0 with the appropriate value if needed
                     is_accepted: false,
                 });
 
@@ -138,8 +137,32 @@ fn submit_proposal(job_id: u64, freelancer: String, cover_letter: String) -> Res
     })
 }
 
+#[update]
+fn send_message(job_id: u64, sender: String, content: String) -> Result<bool, Error> {
+    JOBS.with(|jobs| {
+        let mut jobs = jobs.borrow_mut();
+        if let Some(job) = jobs.iter_mut().find(|j| j.id == job_id) {
+            if let Some(chat) = job.chat.as_mut() {
+                if !chat.participants.contains(&sender) {
+                    return Err(Error { message: "You are not a participant in this chat".to_string() });
+                }
 
-// ✅ Client accepts a freelancer's proposal
+                let timestamp = ic_cdk::api::time(); // Get current timestamp
+
+                chat.messages.push(Message {
+                    sender,
+                    content,
+                    timestamp,
+                });
+
+                return Ok(true);
+            }
+            return Err(Error { message: "Chat not found for this job".to_string() });
+        }
+        Err(Error { message: "Job not found".to_string() })
+    })
+}
+
 #[update]
 fn accept_proposal(job_id: u64, freelancer: String) -> Result<bool, Error> {
     JOBS.with(|jobs| {
@@ -158,10 +181,18 @@ fn accept_proposal(job_id: u64, freelancer: String) -> Result<bool, Error> {
                         job.proposals[index].is_accepted = true;
                         job.freelancer = Some(freelancer.clone());
 
-                        // Initialize chat history
-                        CHAT_HISTORY.with(|chat| {
-                            chat.borrow_mut().insert(job_id, vec![]);
+                        // ✅ Automatically start chat when proposal is accepted
+                        job.chat = Some(Chat {
+                            participants: vec![job.client.clone(), freelancer.clone()],
+                            messages: vec![],
                         });
+
+                        ic_cdk::println!(
+                            "Chat started between {} and {} for job ID: {}",
+                            job.client,
+                            freelancer,
+                            job.id
+                        );
 
                         return Ok(true);
                     },
@@ -172,6 +203,7 @@ fn accept_proposal(job_id: u64, freelancer: String) -> Result<bool, Error> {
         Err(Error { message: "Job not found".to_string() })
     })
 }
+
 
 #[query]
 fn get_chat(job_id: u64) -> Result<Chat, Error> {
@@ -195,6 +227,16 @@ fn reject_proposal(job_id: u64, freelancer: String) -> Result<bool, Error> {
             let original_len = job.proposals.len();
             job.proposals.retain(|p| p.freelancer != freelancer);
 
+            ic_cdk::println!(
+                "Proposals before: {}, after rejection: {}",
+                original_len,
+                job.proposals.len()
+            );
+
+            if job.proposals.is_empty() {
+                ic_cdk::println!("All proposals rejected, job can now be deleted.");
+            }
+
             if job.proposals.len() < original_len {
                 return Ok(true);
             } else {
@@ -204,6 +246,7 @@ fn reject_proposal(job_id: u64, freelancer: String) -> Result<bool, Error> {
         Err(Error { message: "Job not found".to_string() })
     })
 }
+
 
 #[update]
 fn start_chat(job_id: u64, freelancer: String) -> Result<bool, Error> {
@@ -227,23 +270,15 @@ fn start_chat(job_id: u64, freelancer: String) -> Result<bool, Error> {
 }
 
 
-
 #[update]
 fn delete_job(job_id: u64) -> Result<bool, Error> {
     JOBS.with(|jobs| {
         let mut jobs = jobs.borrow_mut();
-        ic_cdk::println!("Deleting job with ID: {}", job_id); // Debugging log
-
         if let Some(index) = jobs.iter().position(|job| job.id == job_id) {
-            if jobs[index].freelancer.is_some() {
-                return Err(Error { message: "Cannot delete job with an assigned freelancer".to_string() });
-            }
-
-            jobs.remove(index);
+            jobs.remove(index); // ✅ Remove job directly, no checks
             ic_cdk::println!("Job deleted successfully.");
             Ok(true)
         } else {
-            ic_cdk::println!("Job not found.");
             Err(Error { message: "Job not found".to_string() })
         }
     })
@@ -252,22 +287,7 @@ fn delete_job(job_id: u64) -> Result<bool, Error> {
 
 
 
-// ✅ Fund a job (Placeholder for ICP token transfer integration)
-#[update]
-fn fund_job(job_id: u64, client: String) -> Result<bool, Error> {
-    JOBS.with(|jobs| {
-        let mut jobs = jobs.borrow_mut();
-        for job in jobs.iter_mut() {
-            if job.id == job_id && job.client == client {
-                if job.funded {
-                    return Err(Error { message: "Job is already funded".to_string() });
-                }
-                job.funded = true;
-                return Ok(true);
-            }
-        }
-        Err(Error { message: "Job not found or unauthorized".to_string() })
-    })
-}
+
+
 
 export_candid!();
