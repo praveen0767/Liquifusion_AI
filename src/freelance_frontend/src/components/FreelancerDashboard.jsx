@@ -41,32 +41,21 @@ const FreelancerDashboard = ({ user }) => {
 
   const [proposals, setProposals] = useState({}); // Store submitted proposals (jobId -> boolean)
 
-  const submitProposal = async (jobId, coverLetter, jobBudget) => {
+  const submitProposal = async (jobId, coverLetter) => {
     try {
-      if (!coverLetter) throw new Error("Cover Letter cannot be empty!");
-      if (!user) throw new Error("User not authenticated. Please log in.");
-
-      console.log("User Debugging:", user);
-      console.log("Type of User:", typeof user);
-
-      let clientId;
-      if (typeof user === "string") {
-        clientId = user; // ✅ Already a valid Principal ID string
-      } else if (user.toText) {
-        clientId = user.toText(); // ✅ Convert Principal to text format
-      } else {
-        throw new Error("Invalid user ID format. Ensure you are logged in.");
+      if (!coverLetter) {
+        throw new Error("Cover Letter cannot be empty!");
       }
 
-      console.log(
-        `Submitting proposal for Job ID: ${jobId}, Client ID: ${clientId}`
-      );
+      console.log(`Submitting proposal for Job ID: ${jobId}`);
 
+      const freelancerId = "freelancer_123"; // ✅ Replace with actual logged-in user ID or use default
+
+      // Call backend with (jobId, freelancerId, coverLetter)
       const response = await freelance_backend.submit_proposal(
-        BigInt(jobId),
-        clientId, // ✅ Pass the correctly formatted client ID
-        coverLetter,
-        BigInt(jobBudget)
+        BigInt(jobId), // ✅ Convert job ID to BigInt (nat64)
+        freelancerId, // ✅ Correctly pass as text
+        coverLetter // ✅ Correctly pass as text
       );
 
       console.log("Proposal Submission Response:", response);

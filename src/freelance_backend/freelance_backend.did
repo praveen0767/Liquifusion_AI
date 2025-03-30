@@ -33,5 +33,5 @@ service : {
   post_job : (text, text, nat64, text, text) -> (Result_2);
   reject_proposal : (nat64, text) -> (Result);
   start_chat : (nat64, text) -> (Result);
-  submit_proposal : (nat64, text, text, nat64) -> (Result);
+  submit_proposal : (nat64, text, text) -> (Result);
 }

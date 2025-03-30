@@ -20,7 +20,12 @@ const ClientDashboard = ({ user }) => {
     try {
       console.log("Fetching all jobs...");
       const jobList = await freelance_backend.get_jobs();
-      console.log("Jobs with proposals:", jobList);
+
+      // Debug: Check if proposals are coming from the backend
+      jobList.forEach((job) => {
+        console.log(`Job ID: ${job.id}, Proposals:`, job.proposals);
+      });
+
       setJobs(jobList);
     } catch (error) {
       console.error("Error fetching jobs:", error);
@@ -212,12 +217,13 @@ const ClientDashboard = ({ user }) => {
               </p>
 
               {job.freelancer ? (
-                <p>✅ Assigned to: {job.freelancer}</p>
-              ) : job.proposals.length > 0 ? (
+                <p> {job.freelancer}</p>
+              ) : job.proposals && job.proposals.length > 0 ? (
                 <ul className="proposal-list">
                   {job.proposals.map((proposal, index) => (
                     <li key={index} className="proposal-item">
-                      <p>📩 From: {proposal.freelancer}</p>
+                      <p>📩 From: {proposal.freelancer.toString()}</p>{" "}
+                      {/* Ensure freelancer is a string */}
                       <p>💬 Cover Letter: {proposal.cover_letter}</p>
                       <div className="proposal-buttons">
                         <button

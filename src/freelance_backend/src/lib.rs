@@ -86,7 +86,7 @@ fn get_jobs() -> Vec<Job> {
 
 #[query]
 fn get_jobs_by_client() -> Vec<Job> {
-    let client_principal = caller().to_string(); // Get the logged-in user's Principal ID
+    let client_principal = caller().to_text(); // Get the logged-in user's Principal ID
 
     JOBS.with(|jobs| {
         jobs.borrow().iter()
@@ -106,29 +106,38 @@ fn get_freelancer_jobs(freelancer: String) -> Vec<Job> {
     })
 }
 
-// ✅ Freelancer submits a proposal
 #[update]
-fn submit_proposal(job_id: u64, freelancer: String, cover_letter: String, expected_budget: u64) -> Result<bool, Error> {
+fn submit_proposal(job_id: u64, freelancer: String, cover_letter: String) -> Result<bool, Error> {
     JOBS.with(|jobs| {
         let mut jobs = jobs.borrow_mut();
+
         for job in jobs.iter_mut() {
             if job.id == job_id {
+                // Check if this freelancer has already submitted a proposal
                 if job.proposals.iter().any(|p| p.freelancer == freelancer) {
-                    return Err(Error { message: "You have already submitted a proposal for this job".to_string() });
+                    return Err(Error {
+                        message: "You have already submitted a proposal for this job".to_string(),
+                    });
                 }
-                
+
+                // Add new proposal
                 job.proposals.push(Proposal {
                     freelancer,
                     cover_letter,
-                    expected_budget,
+                    expected_budget: 0, // Replace 0 with the appropriate value if needed
                     is_accepted: false,
                 });
+
                 return Ok(true);
             }
         }
-        Err(Error { message: "Job not found".to_string() })
+
+        Err(Error {
+            message: "Job not found".to_string(),
+        })
     })
 }
+
 
 // ✅ Client accepts a freelancer's proposal
 #[update]
