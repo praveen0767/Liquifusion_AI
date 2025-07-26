@@ -1,9 +1,22 @@
 {
-  "engines": {
-    "node": ">=16.0.0",
-    "npm": ">=7.0.0"
+  "name": "liquifusion",
+  "version": "1.0.0",
+  "description": "To run this cloned **ICP project** through GitHub, follow these steps:",
+  "homepage": "https://github.com/Chakri7reddy/freelance#readme",
+  "bugs": {
+    "url": "https://github.com/Chakri7reddy/freelance/issues"
   },
-  "name": "freelance",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Chakri7reddy/freelance.git"
+  },
+  "license": "ISC",
+  "author": "",
+  "type": "module",
+  "main": "index.js",
+  "workspaces": [
+    "src/freelance_frontend"
+  ],
   "scripts": {
     "build": "npm run build --workspaces --if-present",
     "prebuild": "npm run prebuild --workspaces --if-present",
@@ -11,8 +24,8 @@
     "start": "npm start --workspaces --if-present",
     "test": "npm test --workspaces --if-present"
   },
-  "type": "module",
-  "workspaces": [
-    "src/freelance_frontend"
-  ]
+  "engines": {
+    "node": ">=16.0.0",
+    "npm": ">=7.0.0"
+  }
 }
