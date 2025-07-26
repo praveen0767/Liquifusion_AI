@@ -50,3 +50,5 @@ The platform also incorporates AI-driven database optimization to ensure fast an
 
 1. **Start the ICP local replica and deploy the backend:**
 
+   Our Startup Presentation link https://github.com/praveen0767/Liquifusion_AI.git
+
