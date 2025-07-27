@@ -1,38 +1,28 @@
 {
   "canisters": {
-    "freelance_backend": {
-      "candid": "src/freelance_backend/freelance_backend.did",
-      "package": "freelance_backend",
-      "type": "rust"
-    },
-    "freelance_frontend": {
-      "dependencies": [
-        "freelance_backend"
-      ],
-      "source": [
-        "src/freelance_frontend/dist"
-      ],
-      "type": "assets",
-      "workspace": "freelance_frontend"
-    },
-    "internet_identity": {
-      "candid": "https://github.com/dfinity/internet-identity/releases/latest/download/internet_identity.did",
-      "frontend": {},
-      "remote": {
-        "id": {
-          "ic": "rdmx6-jaaaa-aaaaa-aaadq-cai"
-        }
-      },
+    "liquifusion_backend": {
+      "main": "src/liquifusion_backend",
       "type": "custom",
-      "wasm": "https://github.com/dfinity/internet-identity/releases/latest/download/internet_identity_dev.wasm.gz"
+      "build": {
+        "cmd": "cargo build --target wasm32-unknown-unknown --release",
+        "output": "target/wasm32-unknown-unknown/release/liquifusion_backend.wasm"
+      },
+      "candid": "src/liquifusion_backend/liquifusion_backend.did"
+    },
+    "liquifusion_frontend": {
+      "main": "src/liquifusion_frontend",
+      "type": "assets",
+      "source": ["dist"]
     }
   },
-  "defaults": {
-    "build": {
-      "args": "",
-      "packtool": ""
+  "networks": {
+    "local": {
+      "bind": "127.0.0.1:8000",
+      "type": "ephemeral"
+    },
+    "ic": {
+      "providers": ["https://ic0.app"]
     }
   },
-  "output_env_file": ".env",
   "version": 1
 }
