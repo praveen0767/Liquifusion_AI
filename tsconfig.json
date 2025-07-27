@@ -1,11 +1,16 @@
 {
-    "compilerOptions": {
-        "strict": true,
-        "target": "ES2020",
-        "experimentalDecorators": true,
-        "strictPropertyInitialization": false,
-        "moduleResolution": "node",
-        "allowJs": true,
-        "outDir": "HACK_BECAUSE_OF_ALLOW_JS"
+  "compilerOptions": {
+    "target": "ESNext",
+    "module": "ESNext",
+    "jsx": "react-jsx",
+    "moduleResolution": "node",
+    "strict": true,
+    "skipLibCheck": true,
+    "baseUrl": ".",
+    "paths": {
+      "declarations/*": ["src/declarations/*"]
     }
+  },
+  "include": ["src"],
+  "exclude": ["node_modules", "dist"]
 }
