@@ -1,8 +1,6 @@
 {
-  "freelance_backend": {
-    "ic": "iok2v-kiaaa-aaaae-qczkq-cai"
-  },
-  "freelance_frontend": {
-    "ic": "ihjrj-4aaaa-aaaae-qczla-cai"
+  "liquifusion_backend": {
+    "local": "rrkah-fqaaa-aaaaa-aaaaq-cai",
+    "ic": "abcd1-aaaaa-aaaaa-aaaaa-abcde-cai"
   }
 }
