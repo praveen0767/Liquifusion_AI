@@ -1,5 +1,14 @@
-[workspace]
-members = [
-    "src/freelance_backend"
-]
-resolver = "2"
+[package]
+name = "liquifusion_backend"
+version = "0.1.0"
+edition = "2021"
+
+[lib]
+crate-type = ["cdylib"]
+
+[dependencies]
+ic-cdk = "0.17"
+ic-cdk-macros = "0.9"
+candid = "0.10"
+serde = { version = "1.0", features = ["derive"] }
+ic-stable-structures = "0.6"
